@@ -20,7 +20,7 @@ conc2<-conc^2
 linear_LS_model <- lm(beetles$y/beetles$n ~ beetles$conc)
 linear_LS_model$fitted.values
 p_fit1 <- linear_LS_model$fitted.values
-plot(beetles$conc,beetles$y/beetles$n)
+  plot(beetles$conc,beetles$y/beetles$n)
 lines(beetles$conc,p_fit1)
 
 #USING QUADRATIC LEAST SQUARES
