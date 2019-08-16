@@ -1,12 +1,11 @@
 ps0 = [ 0.1 0.2 0.3 0.4 ]
 res = allocation_ps(ps0)
 nseq = 4;
-[ps_final,fmin_val] = fmincon(@(prob)allocation_ps(prob), ps0, eye(nseq),ones(nseq,1), ones(1,nseq), [1.0], zeros(nseq,1), ones(nseq,1))
+[ps_final,fmin_val] = fmincon(@(prob)allocation_ps(prob), ps0, [],[], ones(1,nseq), [1.0], zeros(nseq,1), ones(nseq,1))
 
 
 function z = allocation_ps(ps)
 %Defining Parameters
-ps = [0.1 0.7 0.1 0.1];
 mu = [2.0];
 beta = [1;3];
 tau = [5.0];
@@ -56,10 +55,10 @@ R = rho*ones(p)+(1-rho)*eye(p);
 % Storing Inverse of R(alpha)
 R_inv = inv(R);
 
-asymptotic_information_matrix = ps(1)*X1'*sqrt(A1)*R_inv*sqrt(A1)*X1 + ps(2)*X2'*sqrt(A2)*R_inv*sqrt(A2)*X2 + ps(3)*X3'*sqrt(A3)*R_inv*sqrt(A3)*X3 + ps(4)*X4'*sqrt(A4)*R_inv*sqrt(A4)*X4
+asymptotic_information_matrix = ps(1)*X1'*sqrt(A1)*R_inv*sqrt(A1)*X1 + ps(2)*X2'*sqrt(A2)*R_inv*sqrt(A2)*X2 + ps(3)*X3'*sqrt(A3)*R_inv*sqrt(A3)*X3 + ps(4)*X4'*sqrt(A4)*R_inv*sqrt(A4)*X4;
 %n = 1e12;
 %asymptotic_information_matrix = n.* asymptotic_information_matrix;
-asymptotic_variance = inv(asymptotic_information_matrix)
+asymptotic_variance = inv(asymptotic_information_matrix);
 C = asymptotic_variance(3,3);
 y = (C);
 end
