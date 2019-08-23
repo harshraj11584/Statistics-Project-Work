@@ -25,6 +25,7 @@ step_1(H,h_grid_space,theta_vals_l,prob_vals_l,design_l,B_pi_l)
 % get_least_favourable_argument([ 0.1 0.2 0.3 0.4 ])z
 
 function step_1(H,h_grid_space,theta_vals_l,prob_vals_l,design_l,B_pi_l)
+    "design_l"
     design_l
     
     stopping=false;
@@ -36,12 +37,8 @@ function step_1(H,h_grid_space,theta_vals_l,prob_vals_l,design_l,B_pi_l)
             for t3=-1:0.2:1
                 for t4=-1:0.2:1
                     for t5=-1:0.2:1
-                        theta = [t1 t2 t3 t4 t5];
+                        theta = [t1 t2 t3 t4 t5]
                         curr_psi = psi(design_l,theta); 
-                        curr_psi
-                        if max_psi== Inf
-                            "max_psi is Inf"
-                        end
                         if curr_psi > max_psi
                             max_psi = curr_psi;
                             theta_argmax_psi = theta;
@@ -94,7 +91,6 @@ function step_4(H,h_grid_space,theta_vals_l,prob_vals_l,design_l,B_pi_l,design_l
     if B_pi_l1 > B_pi_l
         B_pi_l = B_pi_l1;
         design_l = design_l1;
-        "Assigned l1 to l"
         theta_vals_l = theta_vals_l1;
         prob_vals_l = prob_vals_l1; 
         step_1(H,h_grid_space,theta_vals_l,prob_vals_l,design_l,B_pi_l);
@@ -166,7 +162,7 @@ function y = psi(design,theta)
     R_inv = inv(R);
     
     %print("Length of design")
-    design;
+    design
     asymptotic_information_matrix = design(1)*X1'*sqrt(A1)*R_inv*sqrt(A1)*X1 + design(2)*X2'*sqrt(A2)*R_inv*sqrt(A2)*X2 + design(3)*X3'*sqrt(A3)*R_inv*sqrt(A3)*X3 + design(4)*X4'*sqrt(A4)*R_inv*sqrt(A4)*X4;
     %n = 1e12;
     %asymptotic_information_matrix = n.* asymptotic_information_matrix;

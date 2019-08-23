@@ -9,9 +9,11 @@ l=1; B_pi_l = -inf;
 h_grid_space = 0.25;
 H = 0.0:h_grid_space:1.0;
 %theta = [mu;beta;tau;gam];
-theta_vals_l = [ ones(1,1+p+1+1) ; zeros(1,1+p+1+1)];
+%theta_vals_l = [ ones(1,1+p+1) ; zeros(1,1+p+1)];
+theta_vals_l = [ ones(1,1+p+1) ]
+prob_vals_l = [1.0]
 %For prior distribution, assigning equal prob mass to both theta
-prob_vals_l = [0.5, 0.5];
+%prob_vals_l = [0.5, 0.5];
 % Initial Prior PMF is (theta_vals, prob_vals)
 design_l = get_optimal_on_the_average_design(theta_vals_l,prob_vals_l)
 B_pi_l = B(design_l, theta_vals_l, prob_vals_l)
@@ -34,22 +36,20 @@ function step_1(H,h_grid_space,theta_vals_l,prob_vals_l,design_l,B_pi_l)
     for t1=-1:0.2:1
         for t2=-1:0.2:1
             for t3=-1:0.2:1
-                for t4=-1:0.2:1
-                    for t5=-1:0.2:1
-                        theta = [t1 t2 t3 t4 t5];
-                        curr_psi = psi(design_l,theta); 
-                        curr_psi
-                        if max_psi== Inf
-                            "max_psi is Inf"
-                        end
-                        if curr_psi > max_psi
-                            max_psi = curr_psi;
-                            theta_argmax_psi = theta;
-                            if max_psi > B_pi_l
-                                stopping=true;
-                            end
-                        end
+                for t4=-1:0.2:1                    
+                    theta = [t1 t2 t3 t4];
+                    curr_psi = psi(design_l,theta); 
+                    curr_psi;
+                    if max_psi== Inf
+                        "max_psi is Inf"
                     end
+                    if curr_psi > max_psi
+                        max_psi = curr_psi;
+                        theta_argmax_psi = theta;
+                        if max_psi > B_pi_l
+                            stopping=true;
+                        end
+                    end                    
                 end
             end
         end
@@ -107,7 +107,7 @@ end
 
 function ret_val = get_least_favourable_argument(design)
     p=2;
-    arg_0 = 10*rand(1,1+p+1+1);
+    arg_0 = 10*rand(1,1+p+1);
     l_f_arg = fmincon(@(theta)-1* psi(design,theta), arg_0, [],[]);
     ret_val = l_f_arg;
 end
@@ -131,10 +131,10 @@ function y = psi(design,theta)
     rho = 0.3; %Cross-Correlation Coefficient
 
     % Xj for j= 1,2,3,4 corresponds to X_AA,X_AB,X_BA,X_BB respectively
-    X1 = [ ones(p,1) eye(p) [1;1] [0;1] ];
-    X2 = [ ones(p,1) eye(p) [1;-1] [0;1] ];
-    X3 = [ ones(p,1) eye(p) [-1;1] [0;-1] ];
-    X4 = [ ones(p,1) eye(p) [-1;-1] [0;-1] ];
+    X1 = [ ones(p,1) [1;-1] [1;1] [0;1] ];
+    X2 = [ ones(p,1) [1;-1] [1;-1] [0;1] ];
+    X3 = [ ones(p,1) [1;-1] [-1;1] [0;-1] ];
+    X4 = [ ones(p,1) [1;-1] [-1;-1] [0;-1] ];
 
     % parameters in one column
     % theta = [mu;beta;tau;gam];
