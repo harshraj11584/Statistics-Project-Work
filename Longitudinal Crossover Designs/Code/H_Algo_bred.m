@@ -10,33 +10,28 @@ h_grid_space = 0.25;
 H = 0.0:h_grid_space:1.0;
 %theta = [mu;beta;tau;gam];
 %theta_vals_l = [ ones(1,1+p+1) ; zeros(1,1+p+1)];
-theta_vals_l = [ ones(1,1+p+1) ]
-prob_vals_l = [1.0]
 %For prior distribution, assigning equal prob mass to both theta
 %prob_vals_l = [0.5, 0.5];
+theta_vals_l = [ ones(1,1+p+1) ]
+prob_vals_l = [1.0]
+
 % Initial Prior PMF is (theta_vals, prob_vals)
 design_l = get_optimal_on_the_average_design(theta_vals_l,prob_vals_l)
 B_pi_l = B(design_l, theta_vals_l, prob_vals_l)
 
-
 step_1(H,h_grid_space,theta_vals_l,prob_vals_l,design_l,B_pi_l)
-
-% psi([ 0.1 0.2 0.3 0.4 ], theta_vals_l(1,:))
-% B([ 0.1 0.2 0.3 0.4 ],theta_vals_l, prob_vals_l)
-% get_optimal_on_the_average_design(theta_vals_l,prob_vals_l)
-% get_least_favourable_argument([ 0.1 0.2 0.3 0.4 ])z
 
 function step_1(H,h_grid_space,theta_vals_l,prob_vals_l,design_l,B_pi_l)
     design_l
     
     stopping=false;
     max_psi = -inf;
-    theta_argmax_psi = [0.0 0.0 0.0 0.0 0.0]
+    theta_argmax_psi = [0.0 0.0 0.0 0.0 0.0];
     
-    for t1=-1:0.2:1
-        for t2=-1:0.2:1
-            for t3=-1:0.2:1
-                for t4=-1:0.2:1                    
+    for t1=-1:0.1:1
+        for t2=-1:0.1:1
+            for t3=-1:0.1:1
+                for t4=-1:0.1:1                    
                     theta = [t1 t2 t3 t4];
                     curr_psi = psi(design_l,theta); 
                     curr_psi;
@@ -44,7 +39,7 @@ function step_1(H,h_grid_space,theta_vals_l,prob_vals_l,design_l,B_pi_l)
                         "max_psi is Inf"
                     end
                     if curr_psi > max_psi
-                        max_psi = curr_psi;
+                        max_psi = curr_psi
                         theta_argmax_psi = theta;
                         if max_psi > B_pi_l
                             stopping=true;
