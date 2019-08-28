@@ -19,7 +19,8 @@ theta_vals_l = [ ones(1,1+p+1) ]
 prob_vals_l = [1.0]
 
 % Initial Prior PMF is (theta_vals, prob_vals)
-design_l = get_optimal_on_the_average_design(theta_vals_l,prob_vals_l);
+"Starting Design"
+design_l = get_optimal_on_the_average_design(theta_vals_l,prob_vals_l)
 B_pi_l = B(design_l, theta_vals_l, prob_vals_l);
 
 step_1(H,h_grid_space,theta_vals_l,prob_vals_l,design_l,B_pi_l)
@@ -32,9 +33,10 @@ function step_1(H,h_grid_space,theta_vals_l,prob_vals_l,design_l,B_pi_l)
     stopping=true;
     
     for i=1:1:100        
-        theta_nod = 2*rand(1,1+p+1)+(-1);
+        %initialization of theta_nod according to (0.8,1.1) limit
+        theta_nod = 0.3*rand(1,1+p+1)+(0.8);
         options = optimoptions('fmincon','Display','none');
-        [this_theta_psi_max, this_psi_max] = fmincon(@(theta) -psi(design_l,theta), theta_nod, [],[], [], [], -1*ones(1,1+p+1), ones(1,1+p+1),[],options);
+        [this_theta_psi_max, this_psi_max] = fmincon(@(theta) -psi(design_l,theta), theta_nod, [],[], [], [], 0.8*ones(1,1+p+1), 1.1*ones(1,1+p+1),[],options);
         this_psi_max = -1.0*this_psi_max;
         if this_psi_max > psi_max
             psi_max = this_psi_max;
@@ -52,6 +54,11 @@ function step_1(H,h_grid_space,theta_vals_l,prob_vals_l,design_l,B_pi_l)
     if stopping==true
         "Found minmax design"
         design_l
+        "Least Favourable Distribution"
+        "probs"
+        prob_vals_l
+        "thetas"
+        theta_vals_l
     else
         theta_l = theta_argmax_psi;
         step_2(H,h_grid_space,theta_vals_l,prob_vals_l,design_l,B_pi_l,theta_l);
