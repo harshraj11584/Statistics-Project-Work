@@ -2,6 +2,8 @@
 warning off;
 
 p=2;
+global iteration_num
+iteration_num=0;
 
 %Step 0
 
@@ -12,6 +14,7 @@ H = 0.0:h_grid_space:1.0;
 %theta_vals_l = [ ones(1,1+p+1) ; zeros(1,1+p+1)];
 %For prior distribution, assigning equal prob mass to both theta
 %prob_vals_l = [0.5, 0.5];
+"Initial Prior on Theta : "
 theta_vals_l = [ ones(1,1+p+1) ]
 prob_vals_l = [1.0]
 
@@ -22,7 +25,8 @@ B_pi_l = B(design_l, theta_vals_l, prob_vals_l);
 step_1(H,h_grid_space,theta_vals_l,prob_vals_l,design_l,B_pi_l)
 
 function step_1(H,h_grid_space,theta_vals_l,prob_vals_l,design_l,B_pi_l)
-    design_l;
+    global iteration_num;
+    
     p=2;
     theta_argmax_psi = [0.0 0.0 0.0 0.0 0.0]; psi_max = -inf;
     stopping=true;
@@ -37,6 +41,8 @@ function step_1(H,h_grid_space,theta_vals_l,prob_vals_l,design_l,B_pi_l)
             theta_argmax_psi = this_theta_psi_max;
         end
     end
+    iteration_num
+    iteration_num = iteration_num+1;
     psi_max
     B_pi_l
     if psi_max>B_pi_l
