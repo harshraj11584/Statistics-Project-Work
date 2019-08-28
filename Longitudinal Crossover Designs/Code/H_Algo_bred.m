@@ -16,20 +16,21 @@ theta_vals_l = [ ones(1,1+p+1) ]
 prob_vals_l = [1.0]
 
 % Initial Prior PMF is (theta_vals, prob_vals)
-design_l = get_optimal_on_the_average_design(theta_vals_l,prob_vals_l)
-B_pi_l = B(design_l, theta_vals_l, prob_vals_l)
+design_l = get_optimal_on_the_average_design(theta_vals_l,prob_vals_l);
+B_pi_l = B(design_l, theta_vals_l, prob_vals_l);
 
 step_1(H,h_grid_space,theta_vals_l,prob_vals_l,design_l,B_pi_l)
 
 function step_1(H,h_grid_space,theta_vals_l,prob_vals_l,design_l,B_pi_l)
-    design_l
+    design_l;
     p=2;
     theta_argmax_psi = [0.0 0.0 0.0 0.0 0.0]; psi_max = -inf;
     stopping=true;
     
     for i=1:1:100        
         theta_nod = 2*rand(1,1+p+1)+(-1);
-        [this_theta_psi_max, this_psi_max] = fmincon(@(theta) -psi(design_l,theta), theta_nod, [],[], [], [], -1*ones(1,1+p+1), ones(1,1+p+1));
+        options = optimoptions('fmincon','Display','none');
+        [this_theta_psi_max, this_psi_max] = fmincon(@(theta) -psi(design_l,theta), theta_nod, [],[], [], [], -1*ones(1,1+p+1), ones(1,1+p+1),[],options);
         this_psi_max = -1.0*this_psi_max;
         if this_psi_max > psi_max
             psi_max = this_psi_max;
@@ -39,7 +40,7 @@ function step_1(H,h_grid_space,theta_vals_l,prob_vals_l,design_l,B_pi_l)
     psi_max
     B_pi_l
     if psi_max>B_pi_l
-        stopping=false
+        stopping=false;
     end
             
     
@@ -88,12 +89,12 @@ function step_3(H,h_grid_space,theta_vals_l,prob_vals_l,design_l,B_pi_l,theta_l)
     prob_vals_l1 = prob_vals_l;
     theta_vals_l1 = theta_vals_l;
     
-    theta_vals_l
-    prob_vals_l
+    theta_vals_l;
+    prob_vals_l;
     
     for t_val=1:1:length(H)
-        theta_vals_t_l1 = [theta_vals_l1; theta_l]
-        prob_vals_t_l1 = [(1-H(t_val)).*prob_vals_l1 H(t_val)]
+        theta_vals_t_l1 = [theta_vals_l1; theta_l];
+        prob_vals_t_l1 = [(1-H(t_val)).*prob_vals_l1 H(t_val)];
         design_t_l1 = get_optimal_on_the_average_design(theta_vals_t_l1, prob_vals_t_l1);
         B_pi_t_l1 = B(design_t_l1, theta_vals_t_l1, prob_vals_t_l1);        
         if largest_B_pi_t_l1<B_pi_t_l1
@@ -111,27 +112,27 @@ function step_4(H,h_grid_space,theta_vals_l,prob_vals_l,design_l,B_pi_l,design_l
     if B_pi_l1 > B_pi_l
         B_pi_l = B_pi_l1;
         design_l = design_l1;
-        "Assigned l1 to l"
+        "Assigned l1 to l";
         theta_vals_l = theta_vals_l1;
         prob_vals_l = prob_vals_l1; 
         step_1(H,h_grid_space,theta_vals_l,prob_vals_l,design_l,B_pi_l);
     else
-        h_grid_space = h_grid_space/2.0
-        H = 0.0:h_grid_space :1.0
+        h_grid_space = h_grid_space/2.0;
+        H = 0.0:h_grid_space :1.0;
         step_3(H,h_grid_space,theta_vals_l,prob_vals_l,design_l,B_pi_l,theta_l);
     end
 end
 
 function ret_val = get_least_favourable_argument(design)
     p=2;
-    arg_0 = 10*rand(1,1+p+1);
-    l_f_arg = fmincon(@(theta)-1* psi(design,theta), arg_0, [],[]);
+    arg_0 = 10*rand(1,1+p+1);options = optimoptions('fmincon','Display','none');
+    l_f_arg = fmincon(@(theta)-1* psi(design,theta), arg_0, [],[],[],options);
     ret_val = l_f_arg;
 end
 
 function ret_val = get_optimal_on_the_average_design(theta_vals, prob_vals)
-    des_0 = [ 0.1 0.2 0.3 0.4 ]; nseq=4;
-    opt_design = fmincon(@(des)B(des,theta_vals, prob_vals), des_0, [],[], ones(1,nseq), [1.0], zeros(nseq,1), ones(nseq,1));
+    des_0 = [ 0.1 0.2 0.3 0.4 ]; nseq=4;options = optimoptions('fmincon','Display','none');
+    opt_design = fmincon(@(des)B(des,theta_vals, prob_vals), des_0, [],[], ones(1,nseq), [1.0], zeros(nseq,1), ones(nseq,1),[],options);
     ret_val = opt_design;
 end
 
