@@ -8,7 +8,7 @@ iteration_num=0;
 %Step 0
 
 l=1; 
-B_pi_l = -inf;
+B_pi_l = -inf
 h_grid_space = 0.25;
 H = 0.0:h_grid_space:1.0
 
@@ -18,7 +18,7 @@ H = 0.0:h_grid_space:1.0
 %prob_vals_l = [0.5, 0.5];
 "Initial Prior on Theta : "
 theta_vals_l = [ ones(1,1+p+1) ]
-prob_vals_l = [1.0] 
+prob_vals_l = [1.0]
 
 % Initial Prior PMF is (theta_vals, prob_vals)
 "Starting Design"
@@ -145,10 +145,10 @@ function y = psi(design,theta)
     rho = 0.3; %Cross-Correlation Coefficient
 
     % Xj for j= 1,2,3,4 corresponds to X_AA,X_AB,X_BA,X_BB respectively
-    X1 = [ ones(p,1) [1;-1] [1;1] [0;1] ] 
-    X2 = [ ones(p,1) [1;-1] [1;-1] [0;1] ] 
-    X3 = [ ones(p,1) [1;-1] [-1;1] [0;-1] ] 
-    X4 = [ ones(p,1) [1;-1] [-1;-1] [0;-1] ] 
+    X1 = [ ones(p,1) [1;-1] [1;1] [0;1] ]
+    X2 = [ ones(p,1) [1;-1] [1;-1] [0;1] ]
+    X3 = [ ones(p,1) [1;-1] [-1;1] [0;-1] ]
+    X4 = [ ones(p,1) [1;-1] [-1;-1] [0;-1] ]
 
     % parameters in one column
     % theta = [mu;beta;tau;gam];
