@@ -2,15 +2,17 @@
 warning off;
 
 p=2; %if changing, must change values of p everywhere in code 
+rho = 0.5; %Cross-Correlation Coefficient 
+
 global iteration_num
 iteration_num=0;
 
 %Step 0
 
 l=1; 
-B_pi_l = -inf
+B_pi_l = -inf;
 h_grid_space = 0.25;
-H = 0.0:h_grid_space:1.0
+H = 0.0:h_grid_space:1.0;
 
 %theta = [mu;beta;tau;gam];
 %theta_vals_l = [ ones(1,1+p+1) ; zeros(1,1+p+1)];
@@ -18,27 +20,27 @@ H = 0.0:h_grid_space:1.0
 %prob_vals_l = [0.5, 0.5];
 "Initial Prior on Theta : "
 theta_vals_l = [ ones(1,1+p+1) ]
-prob_vals_l = [1.0]
+prob_vals_l = [1.0] 
 
 % Initial Prior PMF is (theta_vals, prob_vals)
 "Starting Design"
-design_l = get_optimal_on_the_average_design(theta_vals_l,prob_vals_l)
-B_pi_l = B(design_l, theta_vals_l, prob_vals_l);
+design_l = get_optimal_on_the_average_design(theta_vals_l,prob_vals_l,rho)
+B_pi_l = B(design_l, theta_vals_l, prob_vals_l,rho);
 
-step_1(H,h_grid_space,theta_vals_l,prob_vals_l,design_l,B_pi_l)
+step_1(H,h_grid_space,theta_vals_l,prob_vals_l,design_l,B_pi_l,rho);
 
-function step_1(H,h_grid_space,theta_vals_l,prob_vals_l,design_l,B_pi_l)
+function step_1(H,h_grid_space,theta_vals_l,prob_vals_l,design_l,B_pi_l,rho)
     global iteration_num;
     
     p=2;
     theta_argmax_psi = [0.0 0.0 0.0 0.0 0.0]; psi_max = -inf;
     stopping=true;
     
-    for i=1:1:100        
-        %initialization of theta_nod according to (0.8,1.1) limit
-        theta_nod = 0.3*rand(1,1+p+1)+(0.8);
+    for i=1:1:50        
+        %initialization of theta_nod according to (-0.5,1.5) limit
+        theta_nod = -2*rand(1,1+p+1)+(1.5);
         options = optimoptions('fmincon','Display','none');
-        [this_theta_psi_max, this_psi_max] = fmincon(@(theta) -psi(design_l,theta), theta_nod, [],[], [], [], 0.8*ones(1,1+p+1), 1.1*ones(1,1+p+1),[],options);
+        [this_theta_psi_max, this_psi_max] = fmincon(@(theta) -psi(design_l,theta,rho), theta_nod, [],[], [], [], -0.5*ones(1,1+p+1), 1.5*ones(1,1+p+1),[],options);
         this_psi_max = -1.0*this_psi_max;
         if this_psi_max > psi_max
             psi_max = this_psi_max;
@@ -49,7 +51,7 @@ function step_1(H,h_grid_space,theta_vals_l,prob_vals_l,design_l,B_pi_l)
     iteration_num = iteration_num+1;
     psi_max
     B_pi_l
-    if psi_max>B_pi_l
+    if psi_max-B_pi_l>10^-4
         stopping=false;
     end
               
@@ -63,19 +65,19 @@ function step_1(H,h_grid_space,theta_vals_l,prob_vals_l,design_l,B_pi_l)
         theta_vals_l
     else
         theta_l = theta_argmax_psi;
-        step_2(H,h_grid_space,theta_vals_l,prob_vals_l,design_l,B_pi_l,theta_l);
+        step_2(H,h_grid_space,theta_vals_l,prob_vals_l,design_l,B_pi_l,theta_l,rho);
     end
 end
 
-function step_2(H,h_grid_space,theta_vals_l,prob_vals_l,design_l,B_pi_l,theta_l)
+function step_2(H,h_grid_space,theta_vals_l,prob_vals_l,design_l,B_pi_l,theta_l,rho)
     %delta_l = unit mass to theta_l
-    step_3(H,h_grid_space,theta_vals_l,prob_vals_l,design_l,B_pi_l,theta_l);
+    step_3(H,h_grid_space,theta_vals_l,prob_vals_l,design_l,B_pi_l,theta_l,rho);
 end
 
-function step_3(H,h_grid_space,theta_vals_l,prob_vals_l,design_l,B_pi_l,theta_l)
+function step_3(H,h_grid_space,theta_vals_l,prob_vals_l,design_l,B_pi_l,theta_l,rho)
     design_l1 = design_l;
     largest_B_pi_t_l1 = -inf;
-    prob_vals_l1 = prob_vals_l
+    prob_vals_l1 = prob_vals_l;
     theta_vals_l1 = theta_vals_l;
     
     theta_vals_l;
@@ -91,8 +93,8 @@ function step_3(H,h_grid_space,theta_vals_l,prob_vals_l,design_l,B_pi_l,theta_l)
         %"new"
         %prob_vals_t_l1
         
-        design_t_l1 = get_optimal_on_the_average_design(theta_vals_t_l1, prob_vals_t_l1);
-        B_pi_t_l1 = B(design_t_l1, theta_vals_t_l1, prob_vals_t_l1);        
+        design_t_l1 = get_optimal_on_the_average_design(theta_vals_t_l1, prob_vals_t_l1,rho);
+        B_pi_t_l1 = B(design_t_l1, theta_vals_t_l1, prob_vals_t_l1,rho);        
         if largest_B_pi_t_l1<B_pi_t_l1
             largest_B_pi_t_l1 = B_pi_t_l1;
             design_l1 = design_t_l1;
@@ -100,55 +102,59 @@ function step_3(H,h_grid_space,theta_vals_l,prob_vals_l,design_l,B_pi_l,theta_l)
             theta_vals_l1 = theta_vals_t_l1;
         end
     end
-    step_4(H,h_grid_space,theta_vals_l,prob_vals_l,design_l,B_pi_l,design_l1, theta_vals_l1, prob_vals_l1, theta_l)    
+    step_4(H,h_grid_space,theta_vals_l,prob_vals_l,design_l,B_pi_l,design_l1, theta_vals_l1, prob_vals_l1, theta_l,rho);    
 end
 
-function step_4(H,h_grid_space,theta_vals_l,prob_vals_l,design_l,B_pi_l,design_l1, theta_vals_l1, prob_vals_l1, theta_l) 
-    B_pi_l1 = B(design_l1, theta_vals_l1, prob_vals_l1);
+function step_4(H,h_grid_space,theta_vals_l,prob_vals_l,design_l,B_pi_l,design_l1, theta_vals_l1, prob_vals_l1, theta_l,rho) 
+    B_pi_l1 = B(design_l1, theta_vals_l1, prob_vals_l1,rho);
     if B_pi_l1 > B_pi_l
         B_pi_l = B_pi_l1;
         design_l = design_l1;
         "Assigned l1 to l";
-        theta_vals_l = theta_vals_l1
+        theta_vals_l = theta_vals_l1;
         prob_vals_l = prob_vals_l1; 
-        step_1(H,h_grid_space,theta_vals_l,prob_vals_l,design_l,B_pi_l);
+        step_1(H,h_grid_space,theta_vals_l,prob_vals_l,design_l,B_pi_l,rho);
     else
         h_grid_space = h_grid_space/2.0;
         H = 0.0:h_grid_space :1.0;
-        step_3(H,h_grid_space,theta_vals_l,prob_vals_l,design_l,B_pi_l,theta_l);
+        step_3(H,h_grid_space,theta_vals_l,prob_vals_l,design_l,B_pi_l,theta_l,rho);
     end
 end
 
-function ret_val = get_least_favourable_argument(design)
-    p=2;
-    arg_0 = 10*rand(1,1+p+1);options = optimoptions('fmincon','Display','none');
-    l_f_arg = fmincon(@(theta)-1* psi(design,theta), arg_0, [],[],[],options);
-    ret_val = l_f_arg;
-end
+% function ret_val = get_least_favourable_argument(design)
+%     p=2;
+%     arg_0 = 10*rand(1,1+p+1);options = optimoptions('fmincon','Display','none');
+%     l_f_arg = fmincon(@(theta)-1* psi(design,theta), arg_0, [],[],[],options);
+%     ret_val = l_f_arg;
+% end
 
-function ret_val = get_optimal_on_the_average_design(theta_vals, prob_vals)
-    des_0 = [ 0.1 0.2 0.3 0.4 ]; nseq=4;options = optimoptions('fmincon','Display','none');
-    opt_design = fmincon(@(des)B(des,theta_vals, prob_vals), des_0, [],[], ones(1,nseq), [1.0], zeros(nseq,1), ones(nseq,1),[],options);
+function ret_val = get_optimal_on_the_average_design(theta_vals, prob_vals,rho)
+    p=2;
+%     des_0 = [ 0.1 0.2 0.3 0.4 ]; 
+    des_0 = rand(1,1+p+1); des_0 = des_0/sum(des_0);
+    nseq=4;
+    options = optimoptions('fmincon','Display','none');
+    opt_design = fmincon(@(des)B(des,theta_vals, prob_vals,rho), des_0, [],[], ones(1,nseq), [1.0], zeros(nseq,1), ones(nseq,1),[],options);
     ret_val = opt_design;
 end
 
-function ret_val = B (design, theta_vals, prob_vals)
+function ret_val = B (design, theta_vals, prob_vals,rho)
     s = 0;
     for i = 1:length(prob_vals)
-        s = s + prob_vals(i)* psi( design, theta_vals(i,:) );
+        s = s + prob_vals(i)* psi( design, theta_vals(i,:),rho );
     end
     ret_val=s;
 end
 
-function y = psi(design,theta)
+function y = psi(design,theta,rho)
     p = 2; %periods
-    rho = 0.3; %Cross-Correlation Coefficient
+    
 
     % Xj for j= 1,2,3,4 corresponds to X_AA,X_AB,X_BA,X_BB respectively
-    X1 = [ ones(p,1) [1;-1] [1;1] [0;1] ]
-    X2 = [ ones(p,1) [1;-1] [1;-1] [0;1] ]
-    X3 = [ ones(p,1) [1;-1] [-1;1] [0;-1] ]
-    X4 = [ ones(p,1) [1;-1] [-1;-1] [0;-1] ]
+    X1 = [ ones(p,1) [0;1] [1;1] [0;1] ]; 
+    X2 = [ ones(p,1) [0;1] [1;-1] [0;1] ] ;
+    X3 = [ ones(p,1) [0;1] [-1;1] [0;-1] ] ;
+    X4 = [ ones(p,1) [0;1] [-1;-1] [0;-1] ] ;
 
     % parameters in one column
     % theta = [mu;beta;tau;gam];
@@ -185,6 +191,6 @@ function y = psi(design,theta)
     %n = 1e12;
     %asymptotic_information_matrix = n.* asymptotic_information_matrix;
     asymptotic_variance = inv(asymptotic_information_matrix);
-    C = asymptotic_variance(3,3);
+    C = log(asymptotic_variance(3,3));
     y = (C);
 end

@@ -1,6 +1,6 @@
-function y = trace_psi(design,theta)
+function y = trace_psi(design,theta,rho)
     p = 2; %periods
-    rho = 0.5; %Cross-Correlation Coefficient
+%     rho = 0.5; %Cross-Correlation Coefficient
 
     % Xj for j= 1,2,3,4 corresponds to X_AA,X_AB,X_BA,X_BB respectively
     X1 = [ ones(p,1) [1;-1] [1;1] [0;1] ];
@@ -40,11 +40,15 @@ function y = trace_psi(design,theta)
     %print("Length of design")
     design;
     A = design(1)*X1'*sqrt(A1)*R_inv*sqrt(A1)*X1 + design(2)*X2'*sqrt(A2)*R_inv*sqrt(A2)*X2 + design(3)*X3'*sqrt(A3)*R_inv*sqrt(A3)*X3 + design(4)*X4'*sqrt(A4)*R_inv*sqrt(A4)*X4;
-  Q = sqrt(A1)*R_inv*sqrt(A1);
+    
+    
+    Q = sqrt(A1)*R_inv*sqrt(A1);
     K = X1'*Q*X1;
-B = eye(4)/(A);
-L = [0 0 1 0]';
-C = eye(1)/(L'*B*L);
-%y = log(C);
-y = trace(B*L*C*L'*B*K);
+    B = eye(4)/(A);
+    L = [0 0 1 0]';
+    C = eye(1)/(L'*B*L);
+    %y = log(C);
+    y = trace(B*L*C*L'*B*K);
+    
+    
 end
